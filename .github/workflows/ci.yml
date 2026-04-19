@@ -17,11 +17,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       
-      - name: Update timestamp
+      - name: Update timestamp (safe)
         run: |
-          echo "Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> README.md
+          if ! grep -q "Last updated:" README.md; then
+            echo "" >> README.md
+            echo "> Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> README.md
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "chore: auto-maintain [skip ci]" --allow-empty || echo "No changes"
-          git push || echo "Push failed or no changes"
+          git commit -m "chore: update timestamp [skip ci]" --allow-empty || true
+          git push || true
